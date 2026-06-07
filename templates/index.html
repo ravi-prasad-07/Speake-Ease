@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Morse Code Translator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .dot-dash-btn {
+      font-size: 24px;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+      background-color: #667eea;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+    .dot-dash-btn:hover {
+      background-color: #5a67d8;
+    }
+    .error-message {
+      color: red;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>SpeakEase: Adaptive Morse Code Based Assistive Communication System</h1>
 
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="/decode" id="morseForm">
+    <label for="morseInput">Enter Pattern (use / for letter and // for word separator and ...... for output):</label><br>
+    <input type="text" id="morseInput" name="morse" placeholder="Example: ...//---//..." value="{{ request.form.morse or '' }}" required style="width:80%; font-size: 16px; padding: 6px;"><br>
+
+    <button type="button" class="dot-dash-btn" id="dotBtn">•</button>
+    <button type="button" class="dot-dash-btn" id="dashBtn">–</button>
+    <button type="button" class="dot-dash-btn" id="slashBtn">/</button>
+    <button type="button" class="dot-dash-btn" id="clearBtn">Clear</button><br>
+
+    <input type="submit" value="Translate" style="margin-top:10px; padding: 8px 30px; font-size:16px; cursor:pointer;">
+    <div class="error-message" id="errorMsg">{{ error or "" }}</div>
+  </form>
+
+  {% if decoded %}
+    <h2>Decoded Text:</h2>
+    <p id="decodedText">{{ decoded }}</p>
+  {% else %}
+    <h2>Decoded Text:</h2>
+    <p id="decodedText"></p>
+  {% endif %}
+
+  <hr>
+
+  <h2>Help: Morse Code Patterns</h2>
+  <table class="morse-table">
+    <thead>
+      <tr><th>Morse Code</th><th>Letter</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>.-</td><td>A</td></tr>
+      <tr><td>-...</td><td>B</td></tr>
+      <tr><td>-.-.</td><td>C</td></tr>
+      <tr><td>-..</td><td>D</td></tr>
+      <tr><td>.</td><td>E</td></tr>
+      <tr><td>..-.</td><td>F</td></tr>
+      <tr><td>--.</td><td>G</td></tr>
+      <tr><td>....</td><td>H</td></tr>
+      <tr><td>..</td><td>I</td></tr>
+      <tr><td>.---</td><td>J</td></tr>
+      <tr><td>-.-</td><td>K</td></tr>
+      <tr><td>.-..</td><td>L</td></tr>
+      <tr><td>--</td><td>M</td></tr>
+      <tr><td>-.</td><td>N</td></tr>
+      <tr><td>---</td><td>O</td></tr>
+      <tr><td>.--.</td><td>P</td></tr>
+      <tr><td>--.-</td><td>Q</td></tr>
+      <tr><td>.-.</td><td>R</td></tr>
+      <tr><td>...</td><td>S</td></tr>
+      <tr><td>-</td><td>T</td></tr>
+      <tr><td>..-</td><td>U</td></tr>
+      <tr><td>...-</td><td>V</td></tr>
+      <tr><td>.--</td><td>W</td></tr>
+      <tr><td>-..-</td><td>X</td></tr>
+      <tr><td>-.--</td><td>Y</td></tr>
+      <tr><td>--..</td><td>Z</td></tr>
+      <tr><td>.----</td><td>1</td></tr>
+      <tr><td>..---</td><td>2</td></tr>
+      <tr><td>...--</td><td>3</td></tr>
+      <tr><td>....-</td><td>4</td></tr>
+      <tr><td>.....</td><td>5</td></tr>
+      <tr><td>-....</td><td>6</td></tr>
+      <tr><td>--...</td><td>7</td></tr>
+      <tr><td>---..</td><td>8</td></tr>
+      <tr><td>----.</td><td>9</td></tr>
+      <tr><td>-----</td><td>0</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const morseInput = document.getElementById('morseInput');
+  const decodedText = document.getElementById('decodedText');
+  const errorMsg = document.getElementById('errorMsg');
+  const morseForm = document.getElementById('morseForm');
+
+  document.getElementById('dotBtn').addEventListener('click', () => {
+    morseInput.value += '.';
+    errorMsg.textContent = '';
+    checkAutoSubmit();
+  });
+
+  document.getElementById('dashBtn').addEventListener('click', () => {
+    morseInput.value += '-';
+    errorMsg.textContent = '';
+  });
+
+  document.getElementById('slashBtn').addEventListener('click', () => {
+    morseInput.value += '/';
+    errorMsg.textContent = '';
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    morseInput.value = '';
+    decodedText.textContent = '';
+    errorMsg.textContent = '';
+  });
+
+  morseInput.addEventListener('input', () => {
+    // Validate input: only '.', '-', '/' allowed
+    const valid = /^[.\-/]*$/.test(morseInput.value);
+    if (!valid) {
+      errorMsg.textContent = 'Invalid character detected!';
+    } else {
+      errorMsg.textContent = '';
+    }
+
+    checkAutoSubmit();
+  });
+
+  // 🔥 Auto-submit when input ends with six dots
+  function checkAutoSubmit() {
+    const val = morseInput.value;
+    if (val.length >= 6 && val.endsWith('......')) {
+      // submit the form automatically
+      morseForm.submit();
+    }
+  }
+</script>
+</body>
+</html>
